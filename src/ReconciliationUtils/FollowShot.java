@@ -103,7 +103,7 @@ public class FollowShot extends Thread{
 
             // Criando margens do icone 
             this._IconBounds = new Rectangle();
-            this._IconBounds.setBounds(this.originPoint.getX(), this.originPoint.getY(), 
+            this._IconBounds.setBounds((int)(this.originPoint.getX()), (int)(this.originPoint.getY()), 
                                        this._UpdatedLocation.getSizeX(), this._UpdatedLocation.getSizeY());
 
             // Definindo tamanho 
@@ -141,8 +141,8 @@ public class FollowShot extends Thread{
             for (SpritePoint point : trajectory) {
                 // Atualizando Posição 
                 this._UpdatedLocation.setPositions(point);
-                this._IconBounds.x = this._UpdatedLocation.getX();
-                this._IconBounds.y = this._UpdatedLocation.getY();
+                this._IconBounds.x = (int)(this._UpdatedLocation.getX());
+                this._IconBounds.y = (int)(this._UpdatedLocation.getY());
 
                 // Marcando fim de operação
                 endTime = Instant.now();

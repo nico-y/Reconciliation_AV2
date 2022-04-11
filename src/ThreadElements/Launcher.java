@@ -201,7 +201,7 @@ public class Launcher extends Thread {
         if (this.selectedTarget != null){
 
             // Estimando posição atual do alvo
-            int deltaY = this.selectedTarget.getSpeed() * ((int)(this.selectedTarget.getTimeStamp().until(
+            float deltaY = this.selectedTarget.getSpeed() * ((int)(this.selectedTarget.getTimeStamp().until(
                 LocalTime.now(), MILLIS))/this._UpdateFrequency);
 
             // Instanciando posição atual do alvo
@@ -416,18 +416,18 @@ public class Launcher extends Thread {
     private static ArrayList<SpritePoint> getBresenhamMap(SpritePoint start, SpritePoint end){
         
         // Declarando variáveis 
-        int x, y; // Posição atual 
-        int xf; // Representa posição final em x 
+        float x, y; // Posição atual 
+        float xf; // Representa posição final em x 
         ArrayList<SpritePoint> trajectory = new ArrayList<SpritePoint>();
 
         // Variação de posições 
-        int dx = Math.abs(end.getX() - start.getX());
-        int dy = Math.abs((end.getY()) - (start.getY()));
+        float dx = Math.abs(end.getX() - start.getX());
+        float dy = Math.abs((end.getY()) - (start.getY()));
 
         // Definindo variáveis de decisão
-        int p = 2*dy - dx; 
-        int p2 = 2*dy;
-        int xy2 = 2*(dy-dx); 
+        float p = 2*dy - dx; 
+        float p2 = 2*dy;
+        float xy2 = 2*(dy-dx); 
 
         if (start.getX() > end.getX()) {
             x = end.getX();
@@ -532,7 +532,7 @@ public class Launcher extends Thread {
      * @param targetSpeed velocidade do alvo
      * @return Melhor posição de tiro estimada
      */
-    private SpritePoint estimateTargetPosition(SpritePoint targetPosition, int targetSpeed){
+    private SpritePoint estimateTargetPosition(SpritePoint targetPosition, float targetSpeed){
         
         // Inicializando Variáveis
         int interactions = 0;

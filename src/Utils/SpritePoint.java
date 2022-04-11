@@ -10,8 +10,8 @@ public class SpritePoint {
 
     //#region Propriedades
     
-    private int _X = 0; // Posição em X
-    private int _Y = 0; // Posição em Y 
+    private float _X = 0; // Posição em X
+    private float _Y = 0; // Posição em Y 
     private int _SizeX = 26;
     private int _SizeY = 26;
     private Image _Icon;
@@ -26,9 +26,9 @@ public class SpritePoint {
         this._Icon = new ImageIcon(iconPath).getImage();
     }
 
-    public SpritePoint (int X, int Y){
-        this._X = X; 
-        this._Y = Y;
+    public SpritePoint (float f, float y){
+        this._X = f; 
+        this._Y = y;
         this._Icon = null;
     }
 
@@ -55,14 +55,14 @@ public class SpritePoint {
     /**
      * @return Posição X da origem.
      */
-    public int getX(){
+    public float getX(){
         return this._X;
     }
 
     /**
      * @return Posição Y da origem. 
      */
-    public int getY(){
+    public float getY(){
         return this._Y;
     }
 
@@ -87,8 +87,8 @@ public class SpritePoint {
         this._X = X;
     }
 
-    public void setY(int Y) {
-        this._Y = Y;
+    public void setY(float f) {
+        this._Y = f;
     }
 
     public int getSizeX() {

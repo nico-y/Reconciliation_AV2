@@ -142,7 +142,7 @@ public class Canvas extends JPanel implements Runnable{
         // Desenhando elementos adicionados
         for (SpritePoint spritePoint : this.graphicElements) {
             // Desenhando elemento no buffer 
-            this.g2D.drawImage(spritePoint.getImage(), spritePoint.getX(), spritePoint.getY(), 
+            this.g2D.drawImage(spritePoint.getImage(), (int)(spritePoint.getX()), (int)(spritePoint.getY()), 
                                spritePoint.getSizeX(), spritePoint.getSizeY(), null);
         }
     }

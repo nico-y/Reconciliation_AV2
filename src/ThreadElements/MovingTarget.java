@@ -89,7 +89,7 @@ public class MovingTarget implements Runnable {
     /**
      * Velocidade do alvo 
      */
-    private int _Speed; 
+    private float _Speed; 
 
     /**
      * Retangulo que vai definir margens do icone do alvo 
@@ -100,6 +100,11 @@ public class MovingTarget implements Runnable {
      * Objetivo de tempo de chegada a ser atingido pelo alvo. 
      */
     private int _TimeObjective;
+
+    /**
+     * Tamanho vertical do canvas. 
+     */
+    private int _CanvasHeight;
 
     //#endregion
 
@@ -113,6 +118,7 @@ public class MovingTarget implements Runnable {
         int initialX; 
 
         // Frequencia de atualização do alvo 
+        this._CanvasHeight = canvasSizeY;
         this._UpdteFrequency = 30;
         this._OriginPoint = new SpritePoint(0, 0);
         this._DestinyPoint = new SpritePoint(0, canvasSizeY);
@@ -141,7 +147,7 @@ public class MovingTarget implements Runnable {
             
             // Criando margens do icone 
             this._IconBounds = new Rectangle();
-            this._IconBounds.setBounds(this._OriginPoint.getX(), this._OriginPoint.getY(), 
+            this._IconBounds.setBounds((int)(this._OriginPoint.getX()), (int)(this._OriginPoint.getY()), 
                                        this._UpdatedLocation.getSizeX(), this._UpdatedLocation.getSizeY());
 
         } catch (IOException e) {
@@ -154,9 +160,9 @@ public class MovingTarget implements Runnable {
 
         // Calculando velocidade inicial
         this._TimeObjective = timeObjective;
-        float velocity = ((float)(canvasSizeY))/(((float)(timeObjective))/((float)(this._UpdteFrequency + 1.2)));
-        System.out.println(velocity);
-        this._Speed = (int)Math.floor(velocity);
+        float velocity = estimateSpeed(timeObjective);
+        this._Speed = velocity;
+        //System.out.println(velocity);
 
         // Criando e Iniciando Thread 
         Thread t = new Thread(this); 
@@ -249,7 +255,7 @@ public class MovingTarget implements Runnable {
     /**
      * @return Velocidade do alvo em px/_UpdateFrequency
      */
-    public int getSpeed() {
+    public float getSpeed() {
         return _Speed;
     }
 
@@ -257,7 +263,7 @@ public class MovingTarget implements Runnable {
      * Altera velocidade de deslocamento do alvo. 
      * @param _Speed Nova velocidade do alvo 
      */
-    public void setSpeed(int _Speed) {
+    public void setSpeed(float _Speed) {
         this._Speed = _Speed;
     }
 
@@ -284,19 +290,20 @@ public class MovingTarget implements Runnable {
 
             // Incrementando posição pela velocidade definida 
             this._UpdatedLocation.setY(this._UpdatedLocation.getY() + _Speed);
-            this._IconBounds.x = this._UpdatedLocation.getX();
-            this._IconBounds.y = this._UpdatedLocation.getY();
+            this._IconBounds.x = (int)(this._UpdatedLocation.getX());
+            this._IconBounds.y = (int)(this._UpdatedLocation.getY());
             
             // Conferindo se passou das possições de disturbio definidas
             if ( indexAux < Disturbance.positions.length && lastPos.getY() < Disturbance.positions[indexAux] && this._UpdatedLocation.getY() >= Disturbance.positions[indexAux]) {
                 
                 // Auxiliar de velociadade
-                int auxSpeed;
+                float auxSpeed;
 
                 // Alterando valor da velocidade e conferindo validade
                 do {
                     auxSpeed = this._Speed;
-                    //auxSpeed += Disturbance.getRandomDisturb();
+                    // Variando velocidade do alvo
+                    auxSpeed += Disturbance.getRandomDisturb();
                 } while (auxSpeed <= 0);
 
                 // Definindo nova velocidade do alvo
@@ -313,7 +320,8 @@ public class MovingTarget implements Runnable {
             }
         }
 
-        System.out.println(this.getTimeStamp().until(LocalTime.now(), MILLIS));
+        // Exibindo tempo total de transcurso do alvo
+        //System.out.println(this.getTimeStamp().until(LocalTime.now(), MILLIS));
 
         // Ao chegar no final o item deve ser removido do cenário
         this.removeFromScenary();
@@ -322,6 +330,9 @@ public class MovingTarget implements Runnable {
         System.gc();
     }
 
-    //#endregion
+    private float estimateSpeed(int timeObjective){
+        return ((float)(this._CanvasHeight))/(((float)(timeObjective))/((float)(this._UpdteFrequency + 0.95)));
+    }
 
+    //#endregion
 }
