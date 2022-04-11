@@ -35,13 +35,19 @@ public class TargetGenerator extends Thread{
      */
     private List<TargetListener> listeners = new ArrayList<TargetListener>();
 
+    /**
+     * Tempo o qual o alvo deve demorar para chegar no objetivo. (Final da tela)
+     */
+    private int timeObjective;
+
     //#endregion
 
     //#region Construtores
 
     //#region Construtor
-    public TargetGenerator(Canvas canvas){
+    public TargetGenerator(Canvas canvas, int time){
         this.canvas = canvas; 
+        this.timeObjective = time;
     }
 
     //#endregion
@@ -63,11 +69,11 @@ public class TargetGenerator extends Thread{
 
             for (int i = 0; i < this.targets; i++) {
                 // Criando alvo
-                MovingTarget target = new MovingTarget(this.canvas.getWindowW(), this.canvas.getWindowH(), sideAux);
+                MovingTarget target = new MovingTarget(this.canvas.getWindowW(), this.canvas.getWindowH(), sideAux, this.timeObjective);
                 this._targetsCollection.add(target);
                 target.addToScennary(this.canvas);
                 //Notificando alvo criado 
-                notifyNewTarget(target);
+                //notifyNewTarget(target);
                 sideAux = !sideAux;
             }
             

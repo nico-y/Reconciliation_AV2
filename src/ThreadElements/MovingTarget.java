@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import ReconciliationUtils.Disturbance;
+import static java.time.temporal.ChronoUnit.MILLIS;
 import Utils.Canvas;
 import Utils.SpritePoint;
 import java.awt.Rectangle;
@@ -95,6 +96,11 @@ public class MovingTarget implements Runnable {
      */
     private Rectangle _IconBounds;
 
+    /**
+     * Objetivo de tempo de chegada a ser atingido pelo alvo. 
+     */
+    private int _TimeObjective;
+
     //#endregion
 
     //#region Construtor
@@ -127,7 +133,7 @@ public class MovingTarget implements Runnable {
 
         // Obtendo velocidade aleatoria entre 1 e 5, corresponde a quantidade de pixeis por ciclo 
         //this._Speed = ThreadLocalRandom.current().nextInt(MIN_SPEED, MAX_SPEED);
-        this._Speed = 4;
+        //this._Speed = 4;
 
         // Criando alvo com localização relacionada a icone 
         try {
@@ -140,13 +146,22 @@ public class MovingTarget implements Runnable {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }                              
+    }
 
-        // Criando Thread e inicializando 
-        Thread t = new Thread(this);
+    public MovingTarget(int canvasSizeX, int canvasSizeY, boolean left_right, int timeObjective){
+        this(canvasSizeX, canvasSizeY, left_right);
+
+        // Calculando velocidade inicial
+        this._TimeObjective = timeObjective;
+        float velocity = ((float)(canvasSizeY))/(((float)(timeObjective))/((float)(this._UpdteFrequency + 1.2)));
+        System.out.println(velocity);
+        this._Speed = (int)Math.floor(velocity);
+
+        // Criando e Iniciando Thread 
+        Thread t = new Thread(this); 
         t.start();
         this._TimeStamp = LocalTime.now();
-                                       
     }
 
     //#endregion
@@ -281,7 +296,7 @@ public class MovingTarget implements Runnable {
                 // Alterando valor da velocidade e conferindo validade
                 do {
                     auxSpeed = this._Speed;
-                    auxSpeed += Disturbance.getRandomDisturb();
+                    //auxSpeed += Disturbance.getRandomDisturb();
                 } while (auxSpeed <= 0);
 
                 // Definindo nova velocidade do alvo
@@ -297,6 +312,8 @@ public class MovingTarget implements Runnable {
                 e.printStackTrace();
             }
         }
+
+        System.out.println(this.getTimeStamp().until(LocalTime.now(), MILLIS));
 
         // Ao chegar no final o item deve ser removido do cenário
         this.removeFromScenary();

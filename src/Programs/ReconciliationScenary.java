@@ -19,6 +19,7 @@ public class ReconciliationScenary extends JFrame {
     private TargetGenerator targetGenerator;
     private List<TargetListener> listeners = new ArrayList<TargetListener>();
     private FollowLauncher launcher;
+    private int targetTimeObjective = 3000;
 
     // Construtor
     public ReconciliationScenary(){
@@ -47,7 +48,7 @@ public class ReconciliationScenary extends JFrame {
         this.launcher = new FollowLauncher(this.canvas);
 
         // Instanciando gerador de alvos 
-        targetGenerator = new TargetGenerator(canvas);
+        targetGenerator = new TargetGenerator(canvas, targetTimeObjective);
 
         // Adicionando ouvinte
         targetGenerator.addTargetListener(this.launcher);
