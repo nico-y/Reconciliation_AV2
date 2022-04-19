@@ -99,12 +99,17 @@ public class MovingTarget implements Runnable {
     /**
      * Objetivo de tempo de chegada a ser atingido pelo alvo. 
      */
-    private int _TimeObjective;
+    private long _TimeObjective;
 
     /**
      * Tamanho vertical do canvas. 
      */
     private int _CanvasHeight;
+
+    /**
+     * Indica se alvo deve sofrer disturbio ou não
+     */
+    private boolean _DisturbTarget = false;
 
     //#endregion
 
@@ -137,10 +142,6 @@ public class MovingTarget implements Runnable {
         this._DestinyArrival = false;
         this._Hit = false;
 
-        // Obtendo velocidade aleatoria entre 1 e 5, corresponde a quantidade de pixeis por ciclo 
-        //this._Speed = ThreadLocalRandom.current().nextInt(MIN_SPEED, MAX_SPEED);
-        //this._Speed = 4;
-
         // Criando alvo com localização relacionada a icone 
         try {
             this._UpdatedLocation = new SpritePoint(this._OriginPoint, ICON_PATH);   
@@ -155,7 +156,7 @@ public class MovingTarget implements Runnable {
         }                              
     }
 
-    public MovingTarget(int canvasSizeX, int canvasSizeY, boolean left_right, int timeObjective){
+    public MovingTarget(int canvasSizeX, int canvasSizeY, boolean left_right, long timeObjective){
         this(canvasSizeX, canvasSizeY, left_right);
 
         // Calculando velocidade inicial
@@ -167,7 +168,6 @@ public class MovingTarget implements Runnable {
         // Criando e Iniciando Thread 
         Thread t = new Thread(this); 
         t.start();
-        this._TimeStamp = LocalTime.now();
     }
 
     //#endregion
@@ -275,8 +275,18 @@ public class MovingTarget implements Runnable {
         return _IconBounds;
     }
 
+    /**
+     * Informa posição de objetivo do alvo. 
+     */
+    public SpritePoint getDestinyPoint() {
+        return _DestinyPoint;
+    }
+
     @Override
     public void run() {
+
+        // Registrando momento de inicio do tiro
+        this._TimeStamp = LocalTime.now();
 
         // Auxiliar para percorrer array de posições de perturbação
         int indexAux = 0;
@@ -297,14 +307,17 @@ public class MovingTarget implements Runnable {
             if ( indexAux < Disturbance.positions.length && lastPos.getY() < Disturbance.positions[indexAux] && this._UpdatedLocation.getY() >= Disturbance.positions[indexAux]) {
                 
                 // Auxiliar de velociadade
-                float auxSpeed;
+                float auxSpeed = this._Speed;
 
-                // Alterando valor da velocidade e conferindo validade
-                do {
+                if (this._DisturbTarget)
+                {
+                    // Alterando valor da velocidade e conferindo validade
+                    do {
                     auxSpeed = this._Speed;
                     // Variando velocidade do alvo
                     auxSpeed += Disturbance.getRandomDisturb();
-                } while (auxSpeed <= 0);
+                    } while (auxSpeed <= 0);
+                }
 
                 // Definindo nova velocidade do alvo
                 this._Speed = auxSpeed;
@@ -321,7 +334,7 @@ public class MovingTarget implements Runnable {
         }
 
         // Exibindo tempo total de transcurso do alvo
-        //System.out.println(this.getTimeStamp().until(LocalTime.now(), MILLIS));
+        System.out.println(this.getElapsedTime());
 
         // Ao chegar no final o item deve ser removido do cenário
         this.removeFromScenary();
@@ -330,8 +343,28 @@ public class MovingTarget implements Runnable {
         System.gc();
     }
 
-    private float estimateSpeed(int timeObjective){
+    /**
+     * Estima velocidade a partir de tempo Objetivo desejado
+     * @param timeObjective tempo desejado
+     * @return velociade necessária
+     */
+    private float estimateSpeed(long timeObjective){
         return ((float)(this._CanvasHeight))/(((float)(timeObjective))/((float)(this._UpdteFrequency + 0.95)));
+    } 
+
+    /**
+     * Calcula tempo restante do ponto atual até o a posição objetivo do alvo. Considerando a 
+     * velociadade instantanea atual. 
+     * @return tempo restante até posição objetivo.
+     */
+    private long estimateTime(){
+        float time =  ((this._DestinyPoint.getY() - this._UpdatedLocation.getY())* ((float)(this._UpdteFrequency + 0.95)))/this._Speed;
+        if (time < 0) time = 0;
+        return (long)(time);
+    }
+
+    private long getElapsedTime(){
+        return this.getTimeStamp().until(LocalTime.now(), MILLIS);
     }
 
     //#endregion

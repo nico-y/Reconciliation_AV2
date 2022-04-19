@@ -19,7 +19,7 @@ public class ReconciliationScenary extends JFrame {
     private TargetGenerator targetGenerator;
     private List<TargetListener> listeners = new ArrayList<TargetListener>();
     private FollowLauncher launcher;
-    private int targetTimeObjective = 3000;
+    private int targetTimeObjective = 5500;
 
     // Construtor
     public ReconciliationScenary(){

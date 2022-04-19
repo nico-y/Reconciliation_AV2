@@ -13,12 +13,17 @@ public class TargetGenerator extends Thread{
     /**
      * Tempo entre a geração de cada Alvo 
      */
-    public int sleepTime = 1500;
+    public int sleepTime = 6500;
 
     /**
      * Quantidade de alvos a ser gerados a cada ciclo
      */
     public int targets = 2;
+
+    /**
+     * Tempo o qual o alvo deve demorar para chegar no objetivo. (Final da tela)
+     */
+    private int timeObjective;
 
     /**
      * Canvas onde o alvo será exibido 
@@ -34,11 +39,6 @@ public class TargetGenerator extends Thread{
      * Ouvintes das notificações de novos tiros.
      */
     private List<TargetListener> listeners = new ArrayList<TargetListener>();
-
-    /**
-     * Tempo o qual o alvo deve demorar para chegar no objetivo. (Final da tela)
-     */
-    private int timeObjective;
 
     //#endregion
 
@@ -73,7 +73,7 @@ public class TargetGenerator extends Thread{
                 this._targetsCollection.add(target);
                 target.addToScennary(this.canvas);
                 //Notificando alvo criado 
-                //notifyNewTarget(target);
+                notifyNewTarget(target);
                 sideAux = !sideAux;
             }
             

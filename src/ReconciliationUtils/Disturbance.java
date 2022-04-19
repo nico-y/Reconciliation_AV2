@@ -11,7 +11,7 @@ public class Disturbance {
     //#region Variáveis
 
     // +- Variação de velocidade (em pixels) que o sistema pode apresentar. 
-    public static int pseudoDeviation = 3; 
+    public static double pseudoDeviation = 3.5; 
 
     /**
      * Lista de posições em Y onde a velocidade deve ser alterada. 
@@ -25,11 +25,11 @@ public class Disturbance {
     /**
      * @return Variação em intervalo definido na classe ( variável pseudoDeviation). 
      */
-    public static int getRandomDisturb() {
-        int min = -Disturbance.pseudoDeviation;
-        int max = Disturbance.pseudoDeviation;
+    public static float getRandomDisturb() {
+        double min = -Disturbance.pseudoDeviation;
+        double max = Disturbance.pseudoDeviation;
         Random random = new Random();
-        return random.nextInt(max - min) + min;
+        return (float)(random.nextDouble(max - min) + min);
     }
 
     /**

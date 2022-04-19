@@ -58,7 +58,7 @@ public class FollowShot extends Thread{
     /**
      * Momento de lançamento. 
      */
-    private LocalTime timeStamp = LocalTime.now();
+    private LocalTime timeStamp;
 
     /**
      * Frequência de atualização da posição 
@@ -89,7 +89,6 @@ public class FollowShot extends Thread{
         // Valores Iniciais 
         this.updteFrequency = 30;
         this.hit = false;
-        this.timeStamp = LocalTime.now();
         this.target = target;
         this.followLauncher = followLauncher;
 
@@ -127,7 +126,10 @@ public class FollowShot extends Thread{
     public void run(){
 
         //this._UpdatedLocation.printPosition();
-        double distance = euclidianDistance(this._UpdatedLocation, this.target.getActualPosition());
+        //double distance = euclidianDistance(this._UpdatedLocation, this.target.getActualPosition());
+
+        // Definindo tempo de inicio do tiro
+        this.timeStamp = LocalTime.now();
 
         while ( target != null && euclidianDistance(this._UpdatedLocation, this.target.getActualPosition()) > distanceThreshold) {
             
