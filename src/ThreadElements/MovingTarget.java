@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import ReconciliationUtils.Disturbance;
+import ReconciliationUtils.TargetReconcilator;
+
 import static java.time.temporal.ChronoUnit.MILLIS;
 import Utils.Canvas;
 import Utils.SpritePoint;
@@ -74,12 +76,12 @@ public class MovingTarget implements Runnable {
     /**
      * Armazena se alvo chegou no destino. 
      */
-    private boolean _DestinyArrival; 
+    private boolean _DestinyArrival = false; 
 
     /**
      * Armazena se alvo foi atingido
      */
-    private boolean _Hit; 
+    private boolean _Hit = false; 
 
     /**
      * Cenário onde alvo será desenhado 
@@ -109,7 +111,11 @@ public class MovingTarget implements Runnable {
     /**
      * Indica se alvo deve sofrer disturbio ou não
      */
-    private boolean _DisturbTarget = false;
+    private boolean _DisturbTarget = true;
+
+    private TargetReconcilator reconcilator; 
+    
+    private float yPos = 0;
 
     //#endregion
 
@@ -165,9 +171,15 @@ public class MovingTarget implements Runnable {
         this._Speed = velocity;
         //System.out.println(velocity);
 
+        // Criando reconciliador
+        this.reconcilator = new TargetReconcilator(this);
+
         // Criando e Iniciando Thread 
         Thread t = new Thread(this); 
         t.start();
+
+        // Inicializando cálculos de reconciliação 
+        this.reconcilator.t.start();
     }
 
     //#endregion
@@ -193,6 +205,13 @@ public class MovingTarget implements Runnable {
      */
     public SpritePoint DestinyPoint() {
         return this._DestinyPoint;
+    }
+
+    /**
+     * Informa se alvo chegou no objetivo. 
+     */
+    public boolean hasArrived(){
+        return this._DestinyArrival;
     }
 
     /**
@@ -232,6 +251,28 @@ public class MovingTarget implements Runnable {
     }
 
     /**
+     * Retorna se alvo foi atingido por tiro.
+     */
+    public boolean getHit(){
+        return this._Hit;
+    }
+
+    /**
+     * Ponto de origem do alvo
+     * @return
+     */
+    public SpritePoint getOriginPoint() {
+        return _OriginPoint;
+    }
+
+    /**
+     * Tempo objetivo do alvo. 
+     */
+    public long getTimeObjective() {
+        return _TimeObjective;
+    }
+
+    /**
      * Adiciona alvo movel ao cenario para exibição gráfica. 
      * @param scenary
      */
@@ -261,10 +302,19 @@ public class MovingTarget implements Runnable {
 
     /**
      * Altera velocidade de deslocamento do alvo. 
-     * @param _Speed Nova velocidade do alvo 
+     * @param Speed Nova velocidade do alvo 
      */
-    public void setSpeed(float _Speed) {
-        this._Speed = _Speed;
+    public void setSpeed(float Speed) {
+        this._Speed = Speed;
+    }
+
+    /**
+     * Define velocidade do alvo a partir do tempo desejado para finalização do trajeto entre
+     * o ponto atual e a posição objetivo. 
+     * @param time tempo de transcurso desejado. 
+     */
+    public void setSpeed(long timeObjective){
+        this._Speed = ((float)(this._DestinyPoint.getY() - this._UpdatedLocation.getY()))/(((float)(timeObjective))/((float)(this._UpdteFrequency + 0.95)));
     }
 
     /**
@@ -280,6 +330,10 @@ public class MovingTarget implements Runnable {
      */
     public SpritePoint getDestinyPoint() {
         return _DestinyPoint;
+    }
+
+    public float getYPos(){
+        return this.yPos;
     }
 
     @Override
@@ -302,6 +356,7 @@ public class MovingTarget implements Runnable {
             this._UpdatedLocation.setY(this._UpdatedLocation.getY() + _Speed);
             this._IconBounds.x = (int)(this._UpdatedLocation.getX());
             this._IconBounds.y = (int)(this._UpdatedLocation.getY());
+            this.yPos = _IconBounds.y;
             
             // Conferindo se passou das possições de disturbio definidas
             if ( indexAux < Disturbance.positions.length && lastPos.getY() < Disturbance.positions[indexAux] && this._UpdatedLocation.getY() >= Disturbance.positions[indexAux]) {
@@ -333,6 +388,11 @@ public class MovingTarget implements Runnable {
             }
         }
 
+        // Retornando valor caso tiver chegado ao destino
+        if (!this._Hit) {
+            this._DestinyArrival = true;
+        }
+
         // Exibindo tempo total de transcurso do alvo
         System.out.println(this.getElapsedTime());
 
@@ -357,13 +417,13 @@ public class MovingTarget implements Runnable {
      * velociadade instantanea atual. 
      * @return tempo restante até posição objetivo.
      */
-    private long estimateTime(){
+    public long estimateTime(){
         float time =  ((this._DestinyPoint.getY() - this._UpdatedLocation.getY())* ((float)(this._UpdteFrequency + 0.95)))/this._Speed;
         if (time < 0) time = 0;
         return (long)(time);
     }
 
-    private long getElapsedTime(){
+    public long getElapsedTime(){
         return this.getTimeStamp().until(LocalTime.now(), MILLIS);
     }
 

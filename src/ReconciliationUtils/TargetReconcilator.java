@@ -16,11 +16,13 @@ public class TargetReconcilator implements Runnable{
     /**
      * Quantidade de pontos onde a velocidade será medida. 
      */
-    private final int SENSOR_AMOUNT = 20;
+    private final int SENSOR_AMOUNT = 19;
 
     //#endregion
 
     //#region Atributos 
+
+    private double sensorValues[];
     
     /**
      * Alvo a ser observado.
@@ -30,38 +32,83 @@ public class TargetReconcilator implements Runnable{
     /**
      * Posicao anterior do alvo. 
      */
-    private SpritePoint lastTargetPosition;
+    private float lastTargetPosition;
 
     /**
      * Posições onde o alvo deve ser sensoreado. 
      */
     public int[] reconciliationPositions;
 
-    public float[] varianceVector; 
+    /**
+     * Vetor de variancias
+     */
+    public double[] varianceVector; 
+
+    /**
+     * Matrizes de restrições 
+     */
+    public double[][] restrictionVector; 
+
+    /**
+     * Indice com posição do seguinte sensor
+     */
+    private int nextSensor = 0;
+
+    /**
+     * Valores corrigidos a cada passagem do sensor. 
+     */
+    public double[] correctedValues;
+    
+    /**
+     * Elemento de Thread a ser inicializado
+     */
+    public Thread t; 
 
     //#endregion
 
     //#region Construtores
 
     public TargetReconcilator(MovingTarget target){
+        
         // Atribuindo propriedades
         this.target = target;
         this.reconciliationPositions = new int[SENSOR_AMOUNT];
-        this.varianceVector = new float[SENSOR_AMOUNT];
+        this.sensorValues = new double[SENSOR_AMOUNT];
+        this.varianceVector = new double[SENSOR_AMOUNT];
+        this.restrictionVector = new double[SENSOR_AMOUNT-1][SENSOR_AMOUNT];
+        t = new Thread(this);
 
         // Definindo intervalo entre posições 
-        int posInterval = (int)(this.target.getDestinyPoint().getY()/SENSOR_AMOUNT);
-        int auxPos = 0;
+        int posInterval = (int)(this.target.getDestinyPoint().getY()/(SENSOR_AMOUNT + 1));
+        int auxPos = posInterval;
+        int j = 0;
         
-        // Definindo posições de leitura 
+        // Definindo posições de leitura e preenchendo vetor de variancia  
         for (int i = 0; i < SENSOR_AMOUNT; i++) {
-            this.varianceVector[i] = (float)Disturbance.pseudoDeviation;
-            this.reconciliationPositions[i] = auxPos;
-            auxPos += posInterval;
-        }
 
-        // Declarando vetor de variância
+            // Preenchendo vetor de variancia 
+            this.varianceVector[i] = (float)Disturbance.pseudoDeviation;
+            
+            // Definindo posições de sensoreamento
+            this.reconciliationPositions[i] = auxPos;
+
+            // Incrementando intervalo de posição
+            auxPos += posInterval;
+
+            // Definindo valores iniciais dos sensores
+            this.sensorValues[i] = (float)this.target.getTimeObjective();
+
+            // Definindo matriz de restrições 
+            if (i < SENSOR_AMOUNT - 1) {
+                restrictionVector[i][j] = 1;
+                restrictionVector[i][j+1] = -1;
+                j++;
+            }
+        }    
         
+        // Definindo posição anterior como posição atual
+        this.lastTargetPosition = 0;
+
     }
 
     //#endregion
@@ -70,8 +117,40 @@ public class TargetReconcilator implements Runnable{
 
     @Override
     public void run() {
-        // TODO Auto-generated method stub
+
         
+        
+        while (!this.target.hasArrived()  && nextSensor < SENSOR_AMOUNT) {
+
+            float sensorPos = (float)this.reconciliationPositions[nextSensor];
+            float actPos = this.target.getYPos();
+            System.out.println(actPos);
+            
+            // Conferindo se alvo passou por ponto de sensoreamento
+            if (lastTargetPosition < sensorPos && actPos >= sensorPos) 
+            {
+                // Obtendo estimação de tempo a partir de sensor
+                this.sensorValues[nextSensor] = this.target.getElapsedTime() + this.target.estimateTime();
+
+                // Calculando reconciliação
+                Reconciliation auxRec =  new Reconciliation(sensorValues, varianceVector, restrictionVector);
+                this.correctedValues = auxRec.getReconciledFlow();
+
+                // Passando nova velocidade 
+                this.target.setSpeed(((long)this.correctedValues[nextSensor]) - this.target.getElapsedTime());
+
+                // Exibindo reconciliação
+                auxRec.printMatrix(this.correctedValues);
+
+                // Incrementando posições
+                nextSensor++; 
+
+                // Atualizando posição anterior 
+                lastTargetPosition = actPos;
+            }
+
+            
+        }
     }
 
     //#endregion
