@@ -38,7 +38,7 @@ public class FollowShot extends Thread{
     /**
      * Armazena se alvo foi atingido
      */
-    private boolean hit; 
+    private boolean hit = false; 
 
     /**
      * Cenario onde elemento será exibido
@@ -78,7 +78,7 @@ public class FollowShot extends Thread{
     /**
      * Define distância limite de verificações de distância. 
      */
-    private int distanceThreshold = 10;
+    private int distanceThreshold = 15;
 
     //#endregion
 
@@ -131,35 +131,43 @@ public class FollowShot extends Thread{
         // Definindo tempo de inicio do tiro
         this.timeStamp = LocalTime.now();
 
-        while ( target != null && euclidianDistance(this._UpdatedLocation, this.target.getActualPosition()) > distanceThreshold) {
+        while ( target != null && !this.hit && !this.target.hasArrived()) {
             
-            // Calcular trajetória até o alvo
-            ArrayList<SpritePoint> trajectory =  getDDALineMap(this._UpdatedLocation, target.getActualPosition(), 5);
+            // Conferindo distância do alvo
+            if(euclidianDistance(this._UpdatedLocation, this.target.getActualPosition()) > distanceThreshold)
+            {
 
-            // Percorrer pontos por 30 ms
-            Instant startTime = Instant.now();
-            Instant endTime = startTime; 
-                
-            for (SpritePoint point : trajectory) {
-                // Atualizando Posição 
-                this._UpdatedLocation.setPositions(point);
-                this._IconBounds.x = (int)(this._UpdatedLocation.getX());
-                this._IconBounds.y = (int)(this._UpdatedLocation.getY());
+                // Calcular trajetória até o alvo
+                ArrayList<SpritePoint> trajectory =  getDDALineMap(this._UpdatedLocation, target.getActualPosition(), this.target.getSpeed()*2f);
 
-                // Marcando fim de operação
-                endTime = Instant.now();
+                // Percorrer pontos por 30 ms
+                Instant startTime = Instant.now();
+                Instant endTime = startTime; 
+                    
+                for (SpritePoint point : trajectory) {
+                    // Atualizando Posição 
+                    this._UpdatedLocation.setPositions(point);
+                    this._IconBounds.x = (int)(this._UpdatedLocation.getX());
+                    this._IconBounds.y = (int)(this._UpdatedLocation.getY());
 
-                // Conferindo se tempo máximo de operação já transcorreu
-                if (Duration.between(startTime, endTime).toMillis() >= 90) {
-                    // Finalizar laço
-                    break;
+                    // Marcando fim de operação
+                    endTime = Instant.now();
+
+                    // Conferindo se tempo máximo de operação já transcorreu
+                    if (Duration.between(startTime, endTime).toMillis() >= 90) {
+                        // Finalizar laço
+                        break;
+                    }
+
+                    try {
+                        Thread.sleep(30);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-
-                try {
-                    Thread.sleep(30);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            } else{
+                this.hit = true;
+                this.target.setHit();
             }
         }
 
@@ -208,7 +216,7 @@ public class FollowShot extends Thread{
         return res;
     }
 
-    private ArrayList<SpritePoint> getDDALineMap(SpritePoint start, SpritePoint end, int velVector){
+    private ArrayList<SpritePoint> getDDALineMap(SpritePoint start, SpritePoint end, float velVector){
 
         // Declarando variáveis
         double Vx, Vy, dx, dy;
@@ -234,7 +242,7 @@ public class FollowShot extends Thread{
         Vy = Math.sin(theta)*velVector;
 
         // Adicionando Ponto inicial 
-        trajectory.add(new SpritePoint((int)(x), (int)(y)));
+        trajectory.add(new SpritePoint((float)x, (float)y));
 
         // Tiro Simulado 
         SpritePoint auxShot = new SpritePoint(start);
@@ -243,10 +251,15 @@ public class FollowShot extends Thread{
         while (euclidianDistance(auxShot, end) > distanceThreshold) {
             x += Vx; 
             y += Vy;
-            auxShot.setX((int)(x));
-            auxShot.setY((int)(y));
+            auxShot.setX((float)(x));
+            auxShot.setY((float)(y));
             // Adicionando ponto ao mapa 
             trajectory.add(new SpritePoint(auxShot));
+        }
+
+        // Caso elemento muito próximo ao alvo
+        if (trajectory.isEmpty() && (euclidianDistance(auxShot, end) < distanceThreshold)) {
+            trajectory.add(end);
         }
 
         return trajectory;

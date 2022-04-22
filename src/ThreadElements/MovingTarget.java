@@ -113,8 +113,14 @@ public class MovingTarget implements Runnable {
      */
     private boolean _DisturbTarget = true;
 
+    /**
+     * Reconciliador de dados do alvo. 
+     */
     private TargetReconcilator reconcilator; 
     
+    /**
+     * Posição em Y
+     */
     private float yPos = 0;
 
     //#endregion
@@ -298,6 +304,13 @@ public class MovingTarget implements Runnable {
      */
     public float getSpeed() {
         return _Speed;
+    }
+
+    /**
+     * @return Reconciliador de dados do alvo. 
+     */
+    public TargetReconcilator getReconcilator() {
+        return reconcilator;
     }
 
     /**

@@ -78,12 +78,12 @@ public class SpritePoint {
         this._Y = point.getY();
     }
 
-    public void setPositions(int X, int Y){
+    public void setPositions(float X, float Y){
         this._X = X; 
         this._Y = Y;
     }
 
-    public void setX(int X) {
+    public void setX(float X) {
         this._X = X;
     }
 

@@ -11,7 +11,7 @@ public class Disturbance {
     //#region Variáveis
 
     // +- Variação de velocidade (em pixels) que o sistema pode apresentar. 
-    public static double pseudoDeviation = 3.5; 
+    public static double pseudoDeviation = 2.5; 
 
     /**
      * Lista de posições em Y onde a velocidade deve ser alterada. 

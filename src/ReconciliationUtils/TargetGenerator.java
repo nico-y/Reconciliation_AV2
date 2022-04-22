@@ -13,7 +13,7 @@ public class TargetGenerator extends Thread{
     /**
      * Tempo entre a geração de cada Alvo 
      */
-    public int sleepTime = 6500;
+    public int sleepTime = 3000;
 
     /**
      * Quantidade de alvos a ser gerados a cada ciclo

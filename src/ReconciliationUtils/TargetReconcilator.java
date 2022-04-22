@@ -2,6 +2,7 @@ package ReconciliationUtils;
 
 import ThreadElements.MovingTarget;
 import Utils.SpritePoint;
+import Utils.TxtHelper;
 
 /**
  * Esta classe é responsável por fazer a reconcialicao de dados para compensar 
@@ -38,6 +39,11 @@ public class TargetReconcilator implements Runnable{
      * Posições onde o alvo deve ser sensoreado. 
      */
     public int[] reconciliationPositions;
+
+    /**
+     * Velocidade corrigida calculada. 
+     */
+    public float correctedSpeed; 
 
     /**
      * Vetor de variancias
@@ -118,7 +124,8 @@ public class TargetReconcilator implements Runnable{
     @Override
     public void run() {
 
-        
+        // Criando arquivo de log 
+        String logPath = TxtHelper.createTxt();
         
         while (!this.target.hasArrived()  && nextSensor < SENSOR_AMOUNT) {
 
@@ -139,8 +146,8 @@ public class TargetReconcilator implements Runnable{
                 // Passando nova velocidade 
                 this.target.setSpeed(((long)this.correctedValues[nextSensor]) - this.target.getElapsedTime());
 
-                // Exibindo reconciliação
-                auxRec.printMatrix(this.correctedValues);
+                // Registrando dados reconciliação
+                TxtHelper.appendTxtLine(logPath, TxtHelper.arr2str(correctedValues));
 
                 // Incrementando posições
                 nextSensor++; 
@@ -148,8 +155,6 @@ public class TargetReconcilator implements Runnable{
                 // Atualizando posição anterior 
                 lastTargetPosition = actPos;
             }
-
-            
         }
     }
 
