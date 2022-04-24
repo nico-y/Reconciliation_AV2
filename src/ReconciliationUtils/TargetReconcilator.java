@@ -147,7 +147,9 @@ public class TargetReconcilator implements Runnable{
                 this.target.setSpeed(((long)this.correctedValues[nextSensor]) - this.target.getElapsedTime());
 
                 // Registrando dados reconciliação
-                TxtHelper.appendTxtLine(logPath, TxtHelper.arr2str(correctedValues));
+                //TxtHelper.appendTxtLine(logPath, TxtHelper.arr2str(correctedValues));
+                String text = this.sensorValues[nextSensor] + " " + correctedValues[nextSensor];
+                TxtHelper.appendTxtLine(logPath, text);
 
                 // Incrementando posições
                 nextSensor++; 

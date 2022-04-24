@@ -111,8 +111,8 @@ public class FollowLauncher implements TargetListener {
     public void targetDetected(MovingTarget target) {
         //System.out.println("Alvo detectado...");
         // Inicializa novo tiro
-        //FollowShot shot =  new FollowShot(this, target);
-        //shot.start(); 
+        FollowShot shot =  new FollowShot(this, target);
+        shot.start(); 
     }
 
     //#endregion
